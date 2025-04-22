@@ -69,33 +69,58 @@ module fp_testbench;
     
     // Test cases
     initial begin
+        $display("Floating Point Arithmetic Test Results");
+        $display("-----------------------------------");
+        
         // Test case 1: 7.2 + 3.2
         a = 32'h40E66666; // 7.2
         b = 32'h404CCCCD; // 3.2
         #10;
-        $display("Test 1: %.1f + %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(add_result));
-        $display("Test 1: %.1f * %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
+        $display("Test 1: Addition");
+        $display("  %.1f + %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(add_result));
+        $display("Test 1: Multiplication");
+        $display("  %.1f * %.1f = %.2f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
         
         // Test case 2: -5.5 + 2.25
         a = 32'hC0B00000; // -5.5
         b = 32'h40100000; // 2.25
         #10;
-        $display("Test 2: %.1f + %.2f = %.2f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(add_result));
-        $display("Test 2: %.1f * %.2f = %.2f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
+        $display("\nTest 2: Addition");
+        $display("  %.1f + %.2f = %.2f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(add_result));
+        $display("Test 2: Multiplication");
+        $display("  %.1f * %.2f = %.2f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
         
         // Test case 3: 0.1 + 0.2
         a = 32'h3DCCCCCD; // 0.1
         b = 32'h3E4CCCCD; // 0.2
         #10;
-        $display("Test 3: %.1f + %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(add_result));
-        $display("Test 3: %.1f * %.1f = %.2f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
+        $display("\nTest 3: Addition");
+        $display("  %.1f + %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(add_result));
+        $display("Test 3: Multiplication");
+        $display("  %.1f * %.1f = %.2f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
         
         // Test case 4: 1.0 + (-1.0)
         a = 32'h3F800000; // 1.0
         b = 32'hBF800000; // -1.0
         #10;
-        $display("Test 4: %.1f + %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(add_result));
-        $display("Test 4: %.1f * %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
+        $display("\nTest 4: Addition");
+        $display("  %.1f + %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(add_result));
+        $display("Test 4: Multiplication");
+        $display("  %.1f * %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
+        
+        // Test case 5: 2.5 * 4.0
+        a = 32'h40200000; // 2.5
+        b = 32'h40800000; // 4.0
+        #10;
+        $display("\nTest 5: Multiplication");
+        $display("  %.1f * %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
+        
+        // Test case 6: 1.5 * 2.0
+        a = 32'h3FC00000; // 1.5
+        b = 32'h40000000; // 2.0
+        #10;
+        $display("\nTest 6: Multiplication");
+        $display("  %.1f * %.1f = %.1f", ieee_to_decimal(a), ieee_to_decimal(b), ieee_to_decimal(mul_result));
         
         $finish;
     end
