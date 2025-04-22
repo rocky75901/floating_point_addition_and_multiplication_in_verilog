@@ -15,53 +15,71 @@ module floating_point_multiplier(
     output reg overflow       // Overflow flag
 );
 
-    // Internal signals
-    reg sign_a, sign_b;               // Signs
-    reg [7:0] exp_a, exp_b;           // Exponents
-    reg [23:0] mant_a, mant_b;        // Mantissas (including hidden bit)
-    reg [47:0] mant_product;          // Product of mantissas
-    reg [7:0] exp_sum;                // Sum of exponents
-    reg sign_result;                  // Result sign
-    reg [7:0] exp_result;             // Result exponent
-    reg [23:0] mant_result;           // Result mantissa
-
-    // Extract components from input operands
+    // Extract components
+    wire sign_a = a[31];
+    wire sign_b = b[31];
+    wire [7:0] exp_a = a[30:23];
+    wire [7:0] exp_b = b[30:23];
+    wire [22:0] frac_a = a[22:0];
+    wire [22:0] frac_b = b[22:0];
+    
+    // Calculate result components
+    wire sign_result = sign_a ^ sign_b;
+    reg [8:0] exp_temp;
+    reg [22:0] frac_result;
+    
+    // For mantissa multiplication (hidden bit included)
+    reg [23:0] mant_a;
+    reg [23:0] mant_b;
+    reg [47:0] mant_product;
+    
     always @(*) begin
-        sign_a = a[31];
-        sign_b = b[31];
-        exp_a = a[30:23];
-        exp_b = b[30:23];
-        
-        // Add hidden bit to mantissa
-        mant_a = {1'b1, a[22:0]};
-        mant_b = {1'b1, b[22:0]};
-    end
-
-    // Main multiplication process
-    always @(*) begin
-        // Calculate sign
-        sign_result = sign_a ^ sign_b;
-        
-        // Calculate exponent
-        exp_sum = exp_a + exp_b;
-        exp_result = exp_sum - 8'd127; // Subtract bias
-        
-        // Multiply mantissas
-        mant_product = mant_a * mant_b;
-        
-        // Normalize result
-        if (mant_product[47] == 1'b1) begin
-            mant_result = mant_product[46:23];
-            exp_result = exp_result + 1;
-        end else begin
-            mant_result = mant_product[45:22];
+        // Special cases
+        if (a == 32'h00000000 || b == 32'h00000000) begin
+            // If either operand is zero, result is zero
+            result = 32'h00000000;
+            overflow = 0;
         end
-        
-        // Check for overflow
-        overflow = (exp_result == 8'hFF);
-        
-        // Form final result
-        result = {sign_result, exp_result, mant_result[22:0]};
+        else if (exp_a == 8'hFF || exp_b == 8'hFF) begin
+            // If either operand is inf or NaN, result is inf
+            result = {sign_result, 8'hFF, 23'h000000};
+            overflow = 1;
+        end
+        else begin
+            // Normal case
+            
+            // 1. Add hidden bit '1' to mantissas
+            mant_a = {1'b1, frac_a};
+            mant_b = {1'b1, frac_b};
+            
+            // 2. Multiply mantissas
+            mant_product = mant_a * mant_b;
+            
+            // 3. Add exponents (subtract bias 127)
+            exp_temp = exp_a + exp_b - 127;
+            
+            // 4. Normalize result
+            if (mant_product[47]) begin
+                // If bit 47 is set, shift right and adjust exponent
+                frac_result = mant_product[46:24];
+                exp_temp = exp_temp + 1;
+            end else begin
+                // No need to shift
+                frac_result = mant_product[45:23];
+            end
+            
+            // Check for overflow
+            if (exp_temp >= 255) begin
+                result = {sign_result, 8'hFF, 23'h000000}; // Infinity
+                overflow = 1;
+            end else if (exp_temp <= 0) begin
+                result = {sign_result, 8'h00, 23'h000000}; // Zero (underflow)
+                overflow = 0;
+            end else begin
+                result = {sign_result, exp_temp[7:0], frac_result};
+                overflow = 0;
+            end
+        end
     end
 
 endmodule 
